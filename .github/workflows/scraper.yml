@@ -1,0 +1,64 @@
+name: Run Scraper 4x/day
+
+on:
+  # ⚠️ O cron do GitHub roda em UTC.
+  # "0 */6 * * *" = a cada 6 horas (00:00, 06:00, 12:00, 18:00 UTC).
+  # Em America/Sao_Paulo (UTC-3), isso fica 21:00, 03:00, 09:00, 15:00 (do dia anterior/seguinte conforme o caso).
+  schedule:
+    - cron: "0 */6 * * *"
+  # Permite rodar manualmente pelo botão "Run workflow"
+  workflow_dispatch:
+
+jobs:
+  run-scraper:
+    runs-on: ubuntu-latest
+    # Evita rodar duas execuções ao mesmo tempo se uma atrasar
+    concurrency:
+      group: scraper-${{ github.ref }}
+      cancel-in-progress: false
+    # Mata o job se algo der muito errado (opcional)
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          # ✅ você ajusta: se usa 3.10, 3.12 etc.
+          python-version: "3.12.3"
+          # habilita cache do pip automaticamente
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      # (opcional) teste rápido de import/linters, se quiser
+      # - name: Quick sanity check
+      #   run: python - <<'PY'
+      #     import sys; print("Python ok:", sys.version)
+      #   PY
+
+      - name: Run scraper
+        env:
+          # ✅ você ajusta: crie estes secrets no repo (ver passo 4)
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          TOKEN_TELEGRAM: ${{ secrets.TOKEN_TELEGRAM }}
+          CHATID_TELEGRAM: ${{ secrets.CHATID_TELEGRAM }}
+          # adicione aqui quaisquer outros tokens que seu script usa:
+          # MY_OTHER_TOKEN: ${{ secrets.MY_OTHER_TOKEN }}
+        # ✅ você ajusta: o comando que de fato roda o seu scraper
+        run: |
+          python alimenta_monitoramento_FINAL.py
+
+      # (opcional) upload de artefatos/logs em caso de debug
+      # - name: Upload logs
+      #   if: failure()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: scraper-logs
+      #     path: ./logs/
