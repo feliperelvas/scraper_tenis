@@ -9,12 +9,12 @@ Exemplo do json:
 - url (string): link direto pro produto.
 - price (float): preço atual.
 - currency (string, default "BRL"): para padronizar, mesmo que por enquanto seja só reais.
-- sizes_available (lista de float/int): lista de números (ex.: [34, 35, 36]).
+- size (float): número referente ao tamanho do tênis (ex.: 36).
 - timestamp (ISO 8601 string): quando o dado foi coletado (pra comparar histórico).
 - original_price (float): se tiver preço cheio e preço promocional, isso é útil pra calcular desconto.
 - in_stock (bool): true se tiver ao menos um tamanho disponível.
 - image_url (string): URL da imagem principal (útil se for mandar pro Telegram).
-- brand (string): ex.: "Nike".
+- brand_id (float): ex.: "1" referente a Undo.
 """
 
 class UndoScraper(BaseScraper):

@@ -27,6 +27,10 @@ A ideia surgiu porque, sendo uma pessoa alta e calçando **46–47**, é bem dif
 - Adicionar as consultas e envio para Telegram;
 - Adicionar novas lojas e padronizar o scraping.
 
+## Observações
+
+- Este projeto realiza scraping somente em sites que não aplicam proteções anti-bot. Sites que utilizam WAF/CDN, CAPTCHAs, bloqueios por IP ou outras defesas automatizadas (por exemplo: Nike, Adidas, Centauro) ficarão explicitamente fora do escopo — o fluxo detecta e pula automaticamente esses alvos para garantir conformidade técnica e legal.
+
 ---
 
 Feito com ❤️ para pessoas altas que sofrem para achar tênis grandes.
