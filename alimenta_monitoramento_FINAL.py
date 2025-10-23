@@ -5,7 +5,7 @@ Esse código deve rodar umas 3x por dia para alimentar a tabela "monitoramento" 
 from dotenv import load_dotenv
 import os
 from supabase import create_client
-import undo, eurico, asics
+import undo, eurico, asics, ferracini
 
 load_dotenv()  # carrega as variáveis do arquivo .env
 
@@ -107,3 +107,6 @@ for marca in lista_marcas_monitoradas:
     elif marca == "Asics":
         Asics = asics.AsicsScraper()
         alimentaBancoComProdutosDaMarca(marca, Asics)
+    elif marca == "Ferracini":
+        Ferracini = ferracini.FerraciniScraper()
+        alimentaBancoComProdutosDaMarca(marca, Ferracini)
