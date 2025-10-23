@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import os
 from supabase import create_client
 import undo
+import eurico
 
 load_dotenv()  # carrega as variáveis do arquivo .env
 
@@ -101,3 +102,6 @@ for marca in lista_marcas_monitoradas:
     if marca == "Undo":
         Undo = undo.UndoScraper()
         alimentaBancoComProdutosDaMarca(marca, Undo)
+    elif marca == "Eurico":
+        Eurico = eurico.EuricoScraper()
+        alimentaBancoComProdutosDaMarca(marca, Eurico)
