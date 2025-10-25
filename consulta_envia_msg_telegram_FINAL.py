@@ -79,7 +79,7 @@ else:
 # FUNÇÃO QUE VERIFICA SE VOLTOU PARA ESTOQUE -> preciso testar com casos reais
 # -------------------------------------------------
 
-def find_back_in_stock(df):
+def encontraProdutoQueVoltouParaEstoque(df):
     """
     Retorna um DF com os produtos (name + size) que em algum momento ficaram fora de estoque (False),
     depois viraram True E o último status é True (ou seja, voltaram e permanecem em estoque).
@@ -130,3 +130,61 @@ def find_back_in_stock(df):
     # Ordena por mais recente primeiro (opcional, só apresentação)
     out = out.sort_values("timestamp", ascending=False).reset_index(drop=True)
     return out
+
+
+# -------------------------------------------------
+# FUNÇÃO QUE VERIFICA SE O PRODUTO ESTÁ COM DESCONTO
+# -------------------------------------------------
+
+def encontraProdutoComDesconto(df):
+    """
+    Retorna um DF com os (name, size) que estão com desconto agora:
+
+    Regra 1: se o ÚLTIMO registro tiver price e original_price preenchidos -> está com desconto.
+    Regra 2: se NÃO houver original_price no último, comparar penúltimo vs último:
+             incluir se price_ultimo < price_penultimo.
+
+    Retorna somente o ÚLTIMO registro aprovado de cada (name, size).
+    """
+    df = df.copy()
+    df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
+    df["price"] = pd.to_numeric(df["price"], errors="coerce")
+    if "original_price" in df.columns:
+        df["original_price"] = pd.to_numeric(df["original_price"], errors="coerce")
+    else:
+        df["original_price"] = pd.NA
+
+    if "Unnamed: 0" in df.columns:
+        df = df.drop(columns=["Unnamed: 0"])
+
+    df = df.sort_values(["name", "size", "timestamp"])
+
+    descontos = []
+    for (_, _), grupo in df.groupby(["name", "size"], sort=False):
+        grupo = grupo.sort_values("timestamp")
+        if len(grupo) == 0:
+            continue
+
+        last = grupo.iloc[-1]
+
+        # Regra 1: original_price preenchido no último registro + price preenchido
+        if pd.notna(last.get("price")) and pd.notna(last.get("original_price")):
+            descontos.append(last)
+            continue
+
+        # Regra 2: comparar últimos dois registros quando não há original_price no último
+        if len(grupo) >= 2:
+            penultimo = grupo.iloc[-2]
+            if pd.notna(last.get("price")) and pd.notna(penultimo.get("price")):
+                if float(last["price"]) < float(penultimo["price"]):
+                    descontos.append(last)
+
+    if not descontos:
+        return pd.DataFrame(columns=df.columns)
+
+    out = pd.DataFrame(descontos).reset_index(drop=True)
+    out = out.sort_values("timestamp", ascending=False).reset_index(drop=True)
+    return out
+
+# Agora, preciso de uma MAIN que vai ler o que tiver de de resultado das duas funções acima e mandar pro telegram.
+# Arrumar os códigos que ainda não estão como função, como funções.
