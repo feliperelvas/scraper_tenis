@@ -36,7 +36,7 @@ def get_timestamp_gmt3_datetime() -> datetime:
 def enviaTextoTelegram(mensagem):
 
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-    params = {"chat_id": CHAT_ID, "text": mensagem}
+    params = {"chat_id": CHAT_ID, "text": mensagem, "parse_mode": "html"}
 
     r = requests.get(url, params=params)
 
@@ -44,5 +44,5 @@ def enviaTextoTelegram(mensagem):
 def enviaImagemTelegram(url_imagem, legenda):
 
     url = f"https://api.telegram.org/bot{TOKEN}/sendPhoto"
-    data = {"chat_id": CHAT_ID, "photo": url_imagem, "caption": legenda}
+    data = {"chat_id": CHAT_ID, "photo": url_imagem, "caption": legenda, "parse_mode": "html"}
     r = requests.post(url, data=data)

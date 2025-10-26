@@ -18,8 +18,7 @@ Produto 1: Foto + Nome + Preço + % Desconto + Link
 Produto 2: Foto + Nome + Preço + % Desconto + Link
 """
 
-from utils import enviaImagemTelegram, enviaTextoTelegram
-
+from utils import enviaImagemTelegram
 from datetime import timedelta
 from supabase import create_client
 from dotenv import load_dotenv
@@ -63,7 +62,6 @@ query = (
 
 response = query.execute()
 data = response.data or []
-print(f"🔹 Registros retornados: {len(data)}")
 
 # -------------------------------------------------
 # TRATA EM PANDAS (opcional)
@@ -71,12 +69,9 @@ print(f"🔹 Registros retornados: {len(data)}")
 if data:
     df = pd.DataFrame(data)
     df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True, errors="coerce")
-    print(df.head(10))
-else:
-    print("Nenhum dado encontrado para ontem e hoje.")
 
 # -------------------------------------------------
-# FUNÇÃO QUE VERIFICA SE VOLTOU PARA ESTOQUE -> preciso testar com casos reais
+# FUNÇÃO QUE VERIFICA SE VOLTOU PARA ESTOQUE
 # -------------------------------------------------
 
 def encontraProdutoQueVoltouParaEstoque(df):
@@ -186,5 +181,72 @@ def encontraProdutoComDesconto(df):
     out = out.sort_values("timestamp", ascending=False).reset_index(drop=True)
     return out
 
-# Agora, preciso de uma MAIN que vai ler o que tiver de de resultado das duas funções acima e mandar pro telegram.
-# Arrumar os códigos que ainda não estão como função, como funções.
+
+# -------------------------------------------------
+# MAIN
+# -------------------------------------------------
+
+# Loop para o DF ESTOQUE
+df_estoque = encontraProdutoQueVoltouParaEstoque(df)
+for i, linha in df_estoque.iterrows():
+    url = linha['url']
+    timestamp = linha['timestamp']
+    name = linha['name']
+    price = linha['price']
+    size = linha['size']
+    original_price = linha['original_price']
+    in_stock = linha['in_stock']
+    image_url = linha['image_url']
+    
+    # Criar mensagem formatada em html
+    mensagem = (
+        f"<strong>Produto de volta ao estoque!</strong> ✅\n\n"
+        f"- <strong>Nome:</strong> {name}\n"
+        f"- <strong>Preço:</strong> R$ {price:.2f}\n"
+    )
+
+    if original_price and not pd.isna(original_price):
+        mensagem += f"- <strong>Preço original:</strong> <strike>R$ {original_price:.2f}</strike>\n"
+
+    mensagem += (
+        f"- <strong>Tamanho:</strong> {size}\n"
+        f"- <strong>Link do produto:</strong> {url}"
+    )
+
+    enviaImagemTelegram(url_imagem=image_url,legenda=mensagem)
+
+# Loop para o DF PROMO
+df_promo = encontraProdutoComDesconto(df)
+for i, linha in df_promo.iterrows():
+    url = linha['url']
+    timestamp = linha['timestamp']
+    name = linha['name']
+    price = linha['price']
+    size = linha['size']
+    original_price = linha['original_price']
+    in_stock = linha['in_stock']
+    image_url = linha['image_url']
+
+    # Calcular desconto (só se o preço original existir e for um número válido)
+    linha_de_desconto = ""
+    if original_price and not pd.isna(original_price):
+        discount = (original_price - price) / original_price * 100
+        linha_de_desconto = f"- <strong>Desconto:</strong> {discount:.0f}%\n"
+    
+    # Criar mensagem formatada em html
+    mensagem = (
+        f"<strong>Produto com desconto!</strong> ✅\n\n"
+        f"- <strong>Nome:</strong> {name}\n"
+        f"- <strong>Preço:</strong> R$ {price:.2f}\n"
+    )
+
+    if original_price and not pd.isna(original_price):
+        mensagem += f"- <strong>Preço original:</strong> <strike>R$ {original_price:.2f}</strike>\n"
+
+    mensagem += (
+        linha_de_desconto +
+        f"- <strong>Tamanho:</strong> {size}\n"
+        f"- <strong>Link do produto:</strong> {url}"
+    )
+
+    enviaImagemTelegram(url_imagem=image_url,legenda=mensagem)
