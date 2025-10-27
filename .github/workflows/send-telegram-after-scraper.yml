@@ -39,7 +39,7 @@ jobs:
       # Ajuste 3600 (1h) para o que preferir – ex.: 1800 = 30min
       - name: Esperar ~1 hora após o scraper (opcional)
         if: github.event_name == 'workflow_run'
-        run: sleep 3600
+        run: sleep 60
 
       - name: Checkout
         uses: actions/checkout@v4
