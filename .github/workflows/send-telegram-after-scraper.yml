@@ -1,0 +1,65 @@
+name: Send Telegram after Scraper
+
+on:
+  # Dispara quando o workflow do scraper terminar
+  workflow_run:
+    workflows: ["Run Scraper 4x/day"]   # nome EXATO do seu workflow do scraper
+    types: [completed]
+  # Permite rodar manualmente este workflow (útil para testes)
+  workflow_dispatch:
+
+jobs:
+  send-telegram:
+    # Só roda se:
+    # - veio de workflow_run E o scraper concluiu com sucesso
+    # - OU foi rodado manualmente (workflow_dispatch)
+    if: >
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'workflow_dispatch')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: telegram-${{ github.ref }}
+      cancel-in-progress: false
+    timeout-minutes: 20
+
+    steps:
+      # Gate por horário local: só segue em 09:00 ou 21:00 America/Sao_Paulo
+      - name: Gate por horário (09:00 e 21:00 America/Sao_Paulo)
+        if: github.event_name == 'workflow_run'
+        run: |
+          export TZ=America/Sao_Paulo
+          HORA=$(date +%H)
+          if [ "$HORA" != "09" ] && [ "$HORA" != "21" ]; then
+            echo "Fora das janelas (09:00/21:00 BRT). Encerrando sem erro."
+            exit 0
+          fi
+
+      # (Opcional) espere ~1 hora após o scraper terminar
+      # Ajuste 3600 (1h) para o que preferir – ex.: 1800 = 30min
+      - name: Esperar ~1 hora após o scraper (opcional)
+        if: github.event_name == 'workflow_run'
+        run: sleep 3600
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.3"
+          cache: "pip"
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run Telegram sender
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          TOKEN_TELEGRAM: ${{ secrets.TOKEN_TELEGRAM }}
+          CHATID_TELEGRAM: ${{ secrets.CHATID_TELEGRAM }}
+        run: |
+          python consulta_envia_msg_telegram_FINAL.py
