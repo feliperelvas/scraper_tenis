@@ -24,13 +24,13 @@ A ideia surgiu porque, sendo uma pessoa alta e calçando **46–47**, é bem dif
 
 ## 🚀 Próximos passos
 
-- Adicionar as consultas e envio para Telegram;
-- Adicionar novas lojas e padronizar o scraping.
+- Adicionar novas lojas;
+- Adicionar a possibilidade de "conversar" com o bot do telegram (adicionar novos produtos).
 
 ## Observações
 
-- Este projeto realiza scraping somente em sites que não aplicam proteções anti-bot. Sites que utilizam WAF/CDN, CAPTCHAs, bloqueios por IP ou outras defesas automatizadas (por exemplo: Nike, Adidas, Centauro) ficarão explicitamente fora do escopo — o fluxo detecta e pula automaticamente esses alvos para garantir conformidade técnica e legal.
+- Este projeto realiza scraping somente em sites que não aplicam proteções anti-bot. Sites que utilizam WAF/CDN, CAPTCHAs, bloqueios por IP ou outras defesas automatizadas (por exemplo: Nike, Adidas, Centauro) ficarão explicitamente fora do escopo — o fluxo ignora esses sites para garantir conformidade técnica e legal.
 
 ---
 
-Feito com ❤️ para pessoas altas que sofrem para achar tênis grandes.
+Feito para aprimorar minhas skills em programação e solucionar um problema latente na vida de pessoas altas que sofrem para achar tênis grandes.
