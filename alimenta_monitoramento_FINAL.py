@@ -90,8 +90,11 @@ def alimentaBancoComProdutosDaMarca(marca, objeto):
 
     for produto in dics:
         for size in TARGET_SIZES:
-            if size in produto["sizes_available"]:
-                insereProdutoNoBD(produto, size)
+            try:
+                if size in produto["sizes_available"]:
+                    insereProdutoNoBD(produto, size)
+            except KeyError: # quando da esse erro, é pq o produto saiu do ar, então vou dar um pass para não quebrar o código
+                pass
 
 ### MAIN
 
