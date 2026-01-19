@@ -31,6 +31,12 @@ A ideia surgiu porque, sendo uma pessoa alta e calçando **46–47**, é bem dif
 
 - Este projeto realiza scraping somente em sites que não aplicam proteções anti-bot. Sites que utilizam WAF/CDN, CAPTCHAs, bloqueios por IP ou outras defesas automatizadas (por exemplo: Nike, Adidas, Centauro) ficarão explicitamente fora do escopo — o fluxo ignora esses sites para garantir conformidade técnica e legal.
 
+## 🕒 Execução automática
+
+O Tenis Watcher utiliza **GitHub Actions** para executar os scrapers em intervalos regulares.
+
+Para garantir que os workflows agendados continuem ativos, o repositório inclui um pequeno workflow de **manutenção automática**, que cria periodicamente um commit vazio. Isso evita que o GitHub desabilite execuções agendadas por inatividade do repositório.
+
 ---
 
 Feito para aprimorar minhas skills em programação e solucionar um problema latente na vida de pessoas altas que sofrem para achar tênis grandes.
